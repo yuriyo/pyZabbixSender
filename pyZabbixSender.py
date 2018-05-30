@@ -51,7 +51,7 @@ class pyZabbixSender:
         self.zserver = server
         self.zport   = port
         self.verbose = verbose
-        self.timeout = 5         # Socket connection timeout.
+        self.timeout = 15         # Socket connection timeout.
         self.__data = []         # This is to store data to be sent later.
 
         
@@ -86,6 +86,9 @@ class pyZabbixSender:
         data_to_send = 'ZBXD\1' + str(data_header) + str(mydata)
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii",  1, 0))
+            sock.settimeout(self.timeout)
             sock.connect((self.zserver, self.zport))
             sock.send(data_to_send)
         except Exception, err:
